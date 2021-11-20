@@ -1,0 +1,220 @@
+Supervised learning
+	uses labeled learning
+	predictor variables/feature and a target variable
+	automate time consuming tasks
+	make predictions about the future
+	need labeled data
+	will use scikit-learn/sklearn in python
+unsupervised learning
+	no labeled learning
+	clustering
+reinforcement learning 
+	software agents interact with an environment
+	learn to optimize behavior
+	rewards and punishment
+	pyschology
+
+naming conventions
+	features = predictor variables = independent variables
+	target variable = dependent variable = response variable
+Scikit-learn fit and predict
+	python classes
+		implement the algorithms for learning and predicting
+		store the info learned from the data
+	training a model on the data = fitting a model to the data
+		.fit() method
+	to predict the labels of new data: predict() method
+
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=6)
+knn.fit(iris['data'], iris['target'])
+
+PREDICTING ON UNLABELED DATA
+X_new = np.array([[.......]],[....],[......]])
+prediction = knn.predict(X_new)
+X_new.shape
+print('Prediction: {}'.format(prediction))
+
+Train/test split
+
+from sklearn.model_selection import train_test_split
+X_train,X_test, y_train, y_test =
+	train_test_split(X,y,test_size=0.3,
+			random_state=21, stratify=y)
+knn= KNeightborsClassifier(n_neighbors =8)
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+print(\'Test set predictions:\\n {}\'.format(y_pred))dataset
+
+
+--REGRESSION HOW TO--
+
+boston = pd.read_csv('boston.csv')
+print(boston.head())
+
+
+--creating feature and target arrays--
+
+X = boston.drop('MEDV', axis=1).values
+y = boston['MEDV'].values
+
+
+--predicting house value from a single feature--
+
+X_rooms = X[:,5]
+type(X_rooms), type(y)
+y = y.reshape(-1,1)
+X_rooms = X_rooms.reshape(-1,1)
+
+
+--PLOTTING HOSUE VALUES VS. NUMBER OF ROOMS--
+
+plt.scatter(X_rooms, y)
+plt.ylabel('Value of hosue /1000 ($)')
+plt.xlabel('Number of rooms')
+plt.show();
+
+-fitting a regression model-- 
+
+import numpy as np
+fromsklearn.linear_model import LinearRegression 
+reg = LinearRegression()
+reg.fit(X_rooms, y) 
+prediction_space = np.linspace(min(X_rooms),
+				max(X_rooms)).reshape(-1,1)
+
+
+--Linear Regression--
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+	test_size = 0.3, random_state=42)
+reg_all = LinearRegression()
+y_pred = reg_all.predict(X_test)
+reg_all.score(X_test, y_test)
+
+
+--Area under the ROC curve--
+
+larger area under the ROC curve= better model
+
+from sklearn.metrics import roc_auc_score
+logreg = LogisticRegression()
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+	test_size=0.4, random_state=42)
+logreg.fit(X_train, y_train)
+y_pred_prob = logreg.predict_proba(X_test)[:,1]
+roc_auc_score(y_test, y_pred_prob)
+
+-AUC using corss val-
+
+from sklearn.model_selection import cross_val_score
+cv_scores = cross_val_score(logreg, X, y, cv=5,
+					scoring='roc_auc')
+print(cv_scores)
+
+
+--Hyperparameter tuning--
+
+linear regresssion : choosing parameters
+ridge/lasso regresion : chooing alpha
+k_nearest neighbors : choosing n_neighbers
+
+
+--gridsearCV in scikit_learnn--
+
+from sklearn.model_selection import GridSearchCV
+param_grid = {'n_neighbors': np.arange(1,50)}
+knn - KNeighborsClassifier()
+knn_cv = GridSearchCV(knn, param_grid, cv=5)
+knn_cv.fit(X,y)
+knn_cv.best_params_
+knn_cv.best_score_
+
+
+--holdout set reasoning--
+
+split data into training and hold out set at the beginning 
+perform grid search cross-validation on training set
+choose best hyperparameters and evaluate on hold out set
+
+
+--preprocessing data--
+convert categorical features into numerical by converting to dummy variables
+
+to convert categorical features in python use:
+	scikit-learn: OneHotEncoder()
+	pandas: get_dummies()
+
+
+
+-- handling missing data--
+
+df= df.dropna()
+df.shape
+
+impute missing data
+	make an educated guess about missing values
+	using the mean of the non missing entries
+from sklearn.preprocessing import Imputer
+imp = Imputer(missing_values='NaN', strategy='mean', axis=0
+imp.fit(x)
+X= imp.transform(X)
+
+imputing with a pipeline
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import Imputer
+imp = Imputer(missing_values='NaN', strategy='mean', axis=0)
+logreg = LogisticRegression()
+steps = [('imputation', imp),
+		('logistic_regression', logreg)]
+pipeline = Pipeline(steps)
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+	test_size=0.3, random_state=42)
+pipeline.fit(X_train, y_train)
+y_pred = pipeline.predict(X_test)
+pipeline.score(X_test, y_test)
+
+
+--Centering and scaling--
+
+print(df.describe())
+
+normalizing data or centering:
+	standardize, subtract the mean and divide by variance
+	
+from sklearn.preprocessing import scale
+X_scaled = scale(X)
+np.mean(X), np.std(X)
+np.mean(X_scaled), np.std(X_scaled)
+
+scaling in a pipeline
+
+from sklearn.preprocessing import StandardScaler
+steps = [('scaler', StandardScaler()),
+		('knn', KNeighborsClassifier())]
+pipeline = Pipeline(steps)
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+		test_size=0.2, random_state=21)
+knn_scaled = pipeline.fit(X_train, y_train)
+y_pred = pipeline.predict(X_test)
+accuracy_score(y_test, y_pred)
+
+
+--CV and scaling in a pipeline--
+steps = [('scaler', StandardScaler()), 
+		(('knn', KNeighborsClassifier())]
+pipeline = Pipline(steps)
+parameters = {knn__n_neighbors: np.arange(1, 50)}
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+	test_size=0.2, random_state=21)
+cv = GridSearchCV(pipeline, param_grid=parameters)
+cv.fit(X_train, y_train)
+y_pred = cv.predict(X_test)
+print(cv.best_params_)
+
+print(cv.score(X_test, y_test))
+
+print(classification_report(y_test, y_pred))
