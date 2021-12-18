@@ -127,7 +127,7 @@ print('Test set RMSE of rf: {:.2f}'.format(rmse_test))
 
 import pandas as pd
 import matplotlib.pyplot as plt
-importances_rf = pd.Series(rf.feature_importance_, index = X.columns)
+importances_rf = pd.Series(rf.feature_importances_, index = X.columns)
 sorted_importances_rf = importances_rf.sort_values()
 sorted_importances_rf.plot(kind='barh', color='lightgreen'); plt.show()
 
